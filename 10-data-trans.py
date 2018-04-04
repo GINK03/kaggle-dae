@@ -83,7 +83,8 @@ if '--step2' in sys.argv:
     ys.append( y )
 
   Xs, ys = np.array(Xs), np.array(ys)
-  print(Xs.shape)
+  meta = {'Xs.shape':list(Xs.shape), 'ys.shaope':ys.shape}
+  json.dump(meta, fp=open('metas/meta.json', 'w'), indent=2)
   print(ys.shape)
   open('metas/data.pkl', 'wb').write( pickle.dumps( (Xs, ys) ) )
 
