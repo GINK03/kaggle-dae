@@ -18,6 +18,7 @@ import sys
 import numpy as np
 import pickle
 import time
+import json
 
 input_tensor = Input( shape=(228,) )
 
@@ -81,7 +82,7 @@ if '--train' in sys.argv:
     print(cv_gini)
   y_pred_final = np.mean(ypreds, axis=1)
   print( y_pred_final )
-  df_sub = pd.DataFrame({'id' : list(range(len(y_pred_final))), 
+  df_sub = pd.DataFrame({'id' : json.load(fp=open('metas/ids.json')), 
 								'target' : y_pred_final},
 								columns = ['id','target'])
   df_sub.to_csv('NN_EntityEmbed_5fold-sub.csv', index=False)
