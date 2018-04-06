@@ -54,14 +54,16 @@ def gini_normalizedc(a, p):
 if '--train' in sys.argv:
   Xs, ys  = pickle.load(open('metas/data.pkl', 'rb'))  
   size = int(len(Xs)*0.2) 
-
+  
+  ypreds = {}
   kfold = StratifiedKFold(n_splits = 5 , random_state = 231, shuffle = True)   
   for i,(train_i, test_i) in enumerate(kfold.split(Xs, ys)):
     _Xs, _ys = Xs[train_i], ys[train_i]
     _Xst, _yst = Xs[test_i], ys[test_i]
     
     val_preds = 0
-    for i in range(5):
+    for j in range(5):
+      model.reset_states()
       model.fit(_Xs, _ys, validation_data=(_Xst, _yst), epochs=1, batch_size=260, callbacks=[batch_callback] )
       val_loss = buff['val_loss']
       mae = buff['val_mean_absolute_error']
@@ -70,7 +72,11 @@ if '--train' in sys.argv:
       #model.save(f'models/{mae:0.12f}_{acc:0.12f}_{val_loss:0.12f}_{i:09d}.h5')
       xpred = model.predict(_Xst)[:,0]
       val_preds += xpred
-    cv_gini = gini_normalizedc(yst, val_preds)
-    
+
+      if ypreds.get(j) is None:
+        ypreds[j] = 0
+          
+      #ypreds[j] += model.predict(proc_X_test_f)[:,0] / 5
+    cv_gini = gini_normalizedc(_yst, val_preds)
     print(cv_gini)
     #break
