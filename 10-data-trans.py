@@ -128,3 +128,9 @@ if '--step2' in sys.argv:
   json.dump(meta, fp=open('metas/metat.json', 'w'), indent=2)
   print(yst.shape)
   open('metas/test.pkl', 'wb').write( pickle.dumps( (Xst, yst) ) )
+
+  ## testデータのidsを保存する
+  fp = open(f'{HOME}/.kaggle/competitions/porto-seguro-safe-driver-prediction/test.csv')
+  heads = next(fp).strip().split(',')
+  ids = [line.split(',').pop(0) for line in fp]
+  json.dump(ids, fp=open('metas/ids.json', 'w'), indent=2)
