@@ -12,7 +12,7 @@ from keras.callbacks            import LambdaCallback
 
 
 from sklearn.model_selection import StratifiedKFold
-
+import pandas as pd
 import copy
 import sys
 import numpy as np
@@ -53,10 +53,13 @@ def gini_normalizedc(a, p):
 
 if '--train' in sys.argv:
   Xs, ys  = pickle.load(open('metas/data.pkl', 'rb'))  
+  Xst, yst  = pickle.load(open('metas/test.pkl', 'rb'))  
   size = int(len(Xs)*0.2) 
   
   ypreds = {}
   kfold = StratifiedKFold(n_splits = 5 , random_state = 231, shuffle = True)   
+
+  ypreds = np.zeros((np.shape(Xst)[0],5))
   for i,(train_i, test_i) in enumerate(kfold.split(Xs, ys)):
     _Xs, _ys = Xs[train_i], ys[train_i]
     _Xst, _yst = Xs[test_i], ys[test_i]
@@ -64,7 +67,7 @@ if '--train' in sys.argv:
     val_preds = 0
     for j in range(5):
       model.reset_states()
-      model.fit(_Xs, _ys, validation_data=(_Xst, _yst), epochs=1, batch_size=260, callbacks=[batch_callback] )
+      model.fit(_Xs, _ys, validation_data=(_Xst, _yst), epochs=3, batch_size=260, callbacks=[batch_callback] )
       val_loss = buff['val_loss']
       mae = buff['val_mean_absolute_error']
       acc = buff['val_acc']
@@ -73,10 +76,12 @@ if '--train' in sys.argv:
       xpred = model.predict(_Xst)[:,0]
       val_preds += xpred
 
-      if ypreds.get(j) is None:
-        ypreds[j] = 0
-          
-      #ypreds[j] += model.predict(proc_X_test_f)[:,0] / 5
+      ypreds[:,i] += model.predict(Xst)[:,0] / 5
     cv_gini = gini_normalizedc(_yst, val_preds)
     print(cv_gini)
-    #break
+  y_pred_final = np.mean(ypreds, axis=1)
+  print( y_pred_final )
+  df_sub = pd.DataFrame({'id' : list(range(len(y_pred_final))), 
+								'target' : y_pred_final},
+								columns = ['id','target'])
+  df_sub.to_csv('NN_EntityEmbed_5fold-sub.csv', index=False)

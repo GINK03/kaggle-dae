@@ -88,3 +88,43 @@ if '--step2' in sys.argv:
   print(ys.shape)
   open('metas/data.pkl', 'wb').write( pickle.dumps( (Xs, ys) ) )
 
+  # test data output
+  ##################
+  Xs, ys = [], []
+
+  feat_index = json.load(fp=open('metas/feat_index.json'))
+  fp = open(f'{HOME}/.kaggle/competitions/porto-seguro-safe-driver-prediction/test.csv')
+  heads = next(fp).strip().split(',')
+  for line in fp:
+
+    x = [0.0]*len(feat_index)
+    vals = line.strip().split(',')
+    obj = dict( zip(heads, vals) )
+
+    y = 0# float(obj['target'])
+
+    #del obj['target']
+    del obj['id']
+
+    for key, val in obj.items():
+      if re.search('_cat$', key) is not None:
+        feat = f'{key}:{val}'
+        val = 1.0
+      elif val == '-1' : # 欠損値は-1だそうだ
+        feat = f'{key}:None'
+        val = 1.0
+      else:
+        feat = f'{key}' 
+        val = float(val)
+
+      index = feat_index[ feat ]
+      x[ index ]  = val 
+
+    Xs.append( x )
+    ys.append( y )
+
+  Xst, yst = np.array(Xs), np.array(ys)
+  meta = {'Xst.shape':list(Xst.shape), 'yst.shaope':yst.shape}
+  json.dump(meta, fp=open('metas/metat.json', 'w'), indent=2)
+  print(yst.shape)
+  open('metas/test.pkl', 'wb').write( pickle.dumps( (Xst, yst) ) )
