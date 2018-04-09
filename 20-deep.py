@@ -19,6 +19,7 @@ import numpy as np
 import pickle
 import time
 import json
+import os
 
 input_tensor = Input( shape=(228,) )
 
@@ -28,10 +29,9 @@ x = Dense(100, activation='relu')(x)
 x = Dense(100, activation='relu')(x)
 x = Dense(1, activation='sigmoid')(x)
 
-
 model = Model(inputs=input_tensor, outputs=x)
 
-model.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.0001), metrics=['mae', 'acc'])
+model.compile(loss='binary_crossentropy', optimizer=Adam(), metrics=['mae', 'acc'])
 buff = None
 now  = time.strftime("%H_%M_%S")
 def callback(epoch, logs):
@@ -50,7 +50,6 @@ def ginic(actual, pred):
 
 def gini_normalizedc(a, p):
   return ginic(a, p) / ginic(a, a)
-
 
 if '--train' in sys.argv:
   Xs, ys  = pickle.load(open('metas/data.pkl', 'rb'))  
@@ -86,3 +85,7 @@ if '--train' in sys.argv:
 								'target' : y_pred_final},
 								columns = ['id','target'])
   df_sub.to_csv('NN_EntityEmbed_5fold-sub.csv', index=False)
+
+if '--submit' in sys.argv:
+  os.system('kaggle competitions submit -c porto-seguro-safe-driver-prediction -f NN_EntityEmbed_5fold-sub.csv -m "submission from Kaggle-API"')
+  ...
