@@ -1,5 +1,10 @@
 # 
 
+## Kaggle APIによるコミット
+```console
+$ kaggle competitions submit -c porto-seguro-safe-driver-prediction -f NN_EntityEmbed_5fold-sub.csv -m "submission from Kaggle-API"
+```
+
 ## gini coefficient
 
 https://www.kaggle.com/batzner/gini-coefficient-an-intuitive-explanation
