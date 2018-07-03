@@ -12,16 +12,16 @@ for fname, oname in [('../input/train.csv', 'vars/rank_gauss_train.csv'), ('../i
   for c in df.columns:
     if c in ['id', 'target'] or re.search(r'cat$', c) or 'bin' in c:
       continue
-    series = df[c]
+    series = df[c].rank()
     M = series.max()
     m = series.min() 
     print(c, m, len(series), len(set(df[c].tolist())))
     series = (series-m)/(M-m)
-    #series = series.apply(erfinv) #erfinvするととんでもなく発散する
     series = series - series.mean()
+    series = series.apply(erfinv) 
     #for s in series:
     #  print(s)
     df[c] = series
 
-    df.to_csv(oname, index=None)
+  df.to_csv(oname, index=None)
 
