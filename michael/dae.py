@@ -57,6 +57,7 @@ NFOLDS=1000
 SEED=777
 kf = KFold(len(df.values), n_folds=NFOLDS, shuffle=True, random_state=SEED)
 decay = 0.001
+init_lr = 0.008
 for i, (train_index, test_index) in enumerate(kf):
 
     noised = swap_noise.noise(df.values)
@@ -65,7 +66,8 @@ for i, (train_index, test_index) in enumerate(kf):
                     validation_data=(noised[test_index], df.values[test_index]),
                     batch_size=512,
                     shuffle=True,)
-    next_lr = K.get_value(dae.optimizer.lr)*(1.0-decay)
+    #next_lr = K.get_value(dae.optimizer.lr)*(1.0-decay)
+    next_lr = init_lr*(1.0 - i*decay)
     K.set_value(dae.optimizer.lr, next_lr)
     print('now epoch', i, 'next_lr', next_lr)
 
