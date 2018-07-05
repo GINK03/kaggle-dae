@@ -32,8 +32,8 @@ d = Dense(1500, activation='relu')(e)
 d = Dense(227, activation='linear')(d)
 
 dae = Model(input, d)
-loss = lambda y_true, y_pred: 5000 * losses.mse(y_true, y_pred)
-dae.compile(optimizer=SGD(lr=0.003, decay=0.001), loss=loss)
+loss = lambda y_true, y_pred: 1000 * losses.mse(y_true, y_pred)
+dae.compile(optimizer=SGD(lr=0.008, decay=0.001), loss=loss)
 
 def set_debugger_session():
     sess = K.get_session()
