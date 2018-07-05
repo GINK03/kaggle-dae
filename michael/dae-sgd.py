@@ -20,7 +20,7 @@ import tensorflow as tf
 from tensorflow.python import debug as tf_debug
 from tensorflow.python.debug.lib.debug_data import has_inf_or_nan
 import pandas as pd
-
+import random
 
 input   = Input(shape=(227,))
 e = Dense(227, activation='linear')(input)
@@ -28,12 +28,12 @@ e = Dense(1500, activation='relu')(e)
 e = Dense(1500, activation='relu')(e)
 e = Dense(1500, activation='relu')(e)
 d = Dense(1500, activation='relu')(e)
-#d = Dense(15000, activation='relu')(d)
 d = Dense(227, activation='linear')(d)
 
 dae = Model(input, d)
 loss = lambda y_true, y_pred: 1000 * losses.mse(y_true, y_pred)
-dae.compile(optimizer=SGD(lr=0.008, decay=0.001), loss=loss)
+init_lr = 0.01
+dae.compile(optimizer=SGD(lr=init_lr, decay=0.001), loss=loss)
 
 def set_debugger_session():
     sess = K.get_session()
@@ -53,22 +53,22 @@ from sklearn.cross_validation import KFold
 import swap_noise
 
 #for k in range(100):
-NFOLDS=1000
+NFOLDS=500
 SEED=777
 kf = KFold(len(df.values), n_folds=NFOLDS, shuffle=True, random_state=SEED)
-decay = 0.001
-init_lr = 0.008
-for i, (train_index, test_index) in enumerate(kf):
 
-    noised = swap_noise.noise(df.values)
+decay = 0.98
+noised = swap_noise.noise(df.values)
+for i, (train_index, test_index) in enumerate(kf):
+    if random.random() <= 0.3:
+      noised = swap_noise.noise(df.values)
     dae.fit(noised[train_index], df.values[train_index],
                     epochs=1,
                     validation_data=(noised[test_index], df.values[test_index]),
                     batch_size=512,
                     shuffle=True,)
-    #next_lr = K.get_value(dae.optimizer.lr)*(1.0-decay)
-    next_lr = init_lr*(1.0 - i*decay)
+    next_lr = K.get_value(dae.optimizer.lr)*(decay)
     K.set_value(dae.optimizer.lr, next_lr)
-    print('now epoch', i, 'next_lr', next_lr)
+    print('now epoch', i, 'now', K.get_value(dae.optimizer.lr), 'next_lr', next_lr)
 
-dae.save_weights('vars/dae_deep_stack.h5')
+dae.save_weights(f'vars/dae_deep_stack_sgd_{NFOLDS}.h5')
