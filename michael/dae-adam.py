@@ -23,8 +23,7 @@ import pandas as pd
 import random
 
 input   = Input(shape=(227,))
-e = Dense(227, activation='linear')(input)
-e = Dense(1500, activation='relu')(e)
+e = Dense(1500, activation='relu')(input)
 e = Dense(1500, activation='relu')(e)
 e = Dense(1500, activation='relu')(e)
 d = Dense(1500, activation='relu')(e)
@@ -59,10 +58,11 @@ SEED=777
 kf = KFold(len(df.values), n_folds=NFOLDS, shuffle=True, random_state=SEED)
 
 decay = 0.96
-noised = swap_noise.noise(df.values)
+#noised = swap_noise.noise(df.values)
+noised = df.values
 for i, (train_index, test_index) in enumerate(kf):
-    if random.random() <= 0.3:
-      noised = swap_noise.noise(df.values)
+    #if random.random() <= 0.3:
+    #  noised = swap_noise.noise(df.values)
     dae.fit(noised[train_index], df.values[train_index],
                     epochs=1,
                     validation_data=(noised[test_index], df.values[test_index]),

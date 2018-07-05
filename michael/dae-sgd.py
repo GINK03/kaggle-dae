@@ -23,14 +23,13 @@ import pandas as pd
 import random
 
 input   = Input(shape=(227,))
-e = Dense(227, activation='linear')(input)
+e = Dense(1500, activation='relu')(input)
 e = Dense(1500, activation='relu')(e)
 e = Dense(1500, activation='relu')(e)
 e = Dense(1500, activation='relu')(e)
-d = Dense(1500, activation='relu')(e)
-d = Dense(227, activation='linear')(d)
+e = Dense(227, activation='linear')(e)
 
-dae = Model(input, d)
+dae = Model(input, e)
 loss = lambda y_true, y_pred: 1000 * losses.mse(y_true, y_pred)
 init_lr = 0.01
 dae.compile(optimizer=SGD(lr=init_lr, decay=0.001), loss=loss)
@@ -53,11 +52,11 @@ from sklearn.cross_validation import KFold
 import swap_noise
 
 #for k in range(100):
-NFOLDS=500
+NFOLDS=1000
 SEED=777
 kf = KFold(len(df.values), n_folds=NFOLDS, shuffle=True, random_state=SEED)
 
-decay = 0.98
+decay = 0.995
 noised = swap_noise.noise(df.values)
 for i, (train_index, test_index) in enumerate(kf):
     if random.random() <= 0.3:
@@ -65,7 +64,7 @@ for i, (train_index, test_index) in enumerate(kf):
     dae.fit(noised[train_index], df.values[train_index],
                     epochs=1,
                     validation_data=(noised[test_index], df.values[test_index]),
-                    batch_size=512,
+                    batch_size=128,
                     shuffle=True,)
     next_lr = K.get_value(dae.optimizer.lr)*(decay)
     K.set_value(dae.optimizer.lr, next_lr)
