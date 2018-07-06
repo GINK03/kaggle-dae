@@ -15,27 +15,27 @@ from keras.layers.merge         import Concatenate as Concat
 from keras.layers.noise           import GaussianNoise as GN
 from keras.layers.merge         import Dot,Multiply
 from keras import backend as K
+from keras import losses
 import tensorflow as tf
 from tensorflow.python import debug as tf_debug
 from tensorflow.python.debug.lib.debug_data import has_inf_or_nan
 import pandas as pd
 
 input   = Input(shape=(227,))
-e = Dense(227, activation='linear')(input)
-e = Dense(227, activation='relu')(e)
-e = Dense(128, activation='relu')(e)
-e = Dense(96, activation='linear')(e)
-
-d = Dense(96, activation='relu')(e)
-d = Dense(128, activation='relu')(d)
-d = Dense(227, activation='relu')(d)
+e = Dense(1500, activation='relu')(input)
+e = Dense(1500, activation='relu')(e)
+d = Dense(1500, activation='relu')(e)
+#d = Dense(15000, activation='relu')(d)
 d = Dense(227, activation='linear')(d)
 
 dae = Model(input, d)
-dae.compile(optimizer=Adam(), loss='mse')
+loss = lambda y_true, y_pred: 1000 * losses.mse(y_true, y_pred)
+init_lr = 0.001
+
+dae.compile(optimizer=Adam(lr=init_lr, decay=0.001), loss=loss)
 
 
-dae.load_weights('vars/dae.h5')
+dae.load_weights('vars/dae_deep_stack_sgd_200.h5')
 
 from keras import backend as K
 import numpy as np
@@ -55,19 +55,23 @@ for (df, oname) in [(tdf, 'train'), (Tdf, 'test')]:
   try:
     df = df.drop(['target'], axis=1)
   except Exception: ...
+  
+  size = len(df)
+  for k, split in enumerate(np.split(df.values, list(range(0, size, 1000)) + [size] )):
+    test       = split #df.values
+    layer_outs = [func([test]) for func in functors]
+    print(len(test))
 
-  test       = df.values
-  layer_outs = [func([test]) for func in functors]
-  print(len(test))
-
-  fs =  [ layer_outs[li][0] for li in  range(len(layer_outs)) ] 
-  print(len(fs))
-  fs = list(map(list, zip(*fs)))
-  for i in range(len(fs)):
-    fs[i] = np.hstack(fs[i])
-    #print(fs[i].shape)
-  fs = np.array(fs)
-  print(len(fs))
-  #fs = np.hstack(fs)
-  print( fs.shape )
-  np.save(f'vars/flatten_{oname}', fs)
+    fs =  [ layer_outs[li][0] for li in  range(1, len(layer_outs)-1) ] 
+    print(len(fs))
+    fs = list(map(list, zip(*fs)))
+    for i in range(len(fs)):
+      fs[i] = np.hstack(fs[i])
+      #print(fs[i].shape)
+    fs = np.array(fs)
+    print(len(fs))
+    if len(fs) == 0:
+      continue
+    #fs = np.hstack(fs)
+    print( fs.shape )
+    np.save(f'vars/flatten_sdg_{oname}_{k:09d}_{len(split)}', fs)

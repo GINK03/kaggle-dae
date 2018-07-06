@@ -26,7 +26,6 @@ input   = Input(shape=(227,))
 e = Dense(1500, activation='relu')(input)
 e = Dense(1500, activation='relu')(e)
 e = Dense(1500, activation='relu')(e)
-e = Dense(1500, activation='relu')(e)
 e = Dense(227, activation='linear')(e)
 
 dae = Model(input, e)
@@ -40,7 +39,6 @@ def set_debugger_session():
     sess.add_tensor_filter('has_inf_or_nan', has_inf_or_nan)
     K.set_session(sess)
 
-
 tdf = pd.read_csv('vars/one_hot_train.csv')
 Tdf = pd.read_csv('vars/one_hot_test.csv')
 df = pd.concat([tdf, Tdf], axis=0)
@@ -52,11 +50,11 @@ from sklearn.cross_validation import KFold
 import swap_noise
 
 #for k in range(100):
-NFOLDS=1000
+NFOLDS=200
 SEED=777
 kf = KFold(len(df.values), n_folds=NFOLDS, shuffle=True, random_state=SEED)
 
-decay = 0.995
+decay = 0.985
 noised = swap_noise.noise(df.values)
 for i, (train_index, test_index) in enumerate(kf):
     if random.random() <= 0.3:

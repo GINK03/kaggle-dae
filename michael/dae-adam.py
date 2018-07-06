@@ -26,11 +26,9 @@ input   = Input(shape=(227,))
 e = Dense(1500, activation='relu')(input)
 e = Dense(1500, activation='relu')(e)
 e = Dense(1500, activation='relu')(e)
-d = Dense(1500, activation='relu')(e)
-#d = Dense(15000, activation='relu')(d)
-d = Dense(227, activation='linear')(d)
+output = Dense(227, activation='linear')(e)
 
-dae = Model(input, d)
+dae = Model(input, output)
 loss = lambda y_true, y_pred: 1000 * losses.mse(y_true, y_pred)
 init_lr = 0.001
 dae.compile(optimizer=Adam(lr=init_lr, decay=0.001), loss=loss)
@@ -58,11 +56,11 @@ SEED=777
 kf = KFold(len(df.values), n_folds=NFOLDS, shuffle=True, random_state=SEED)
 
 decay = 0.96
-#noised = swap_noise.noise(df.values)
-noised = df.values
+noised = swap_noise.noise(df.values)
+#noised = df.values
 for i, (train_index, test_index) in enumerate(kf):
-    #if random.random() <= 0.3:
-    #  noised = swap_noise.noise(df.values)
+    if random.random() <= 0.3:
+      noised = swap_noise.noise(df.values)
     dae.fit(noised[train_index], df.values[train_index],
                     epochs=1,
                     validation_data=(noised[test_index], df.values[test_index]),
