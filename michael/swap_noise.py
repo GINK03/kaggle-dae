@@ -16,7 +16,7 @@ def noise(array):
 
   for h in range(height):
     for w in range(width):
-      if rands[h, w] <= 0.15:
+      if rands[h, w] <= 0.10:
         swap_target_h = random.randint(0,h)
         copy[h, w] = array[swap_target_h, w]
       #print(rands[h,w])
