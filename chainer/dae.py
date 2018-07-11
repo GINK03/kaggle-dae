@@ -46,6 +46,7 @@ from chainer.datasets import TupleDataset
 import pandas as pd
 import chainer.serializers
 import sys
+import swap_noise
 is_predict = None
 if '--train' in sys.argv:
   tdf = pd.read_csv('../michael/vars/one_hot_train.csv')
@@ -53,11 +54,12 @@ if '--train' in sys.argv:
   df = pd.concat([tdf, Tdf], axis=0)
   df = df.set_index('id')
   df = df.drop(['target'], axis=1)
-  train = TupleDataset(df.values[:-10000].astype(np.float32), df.values[:-10000].astype(np.float32))
-  test  = TupleDataset(df.values[-10000:].astype(np.float32), df[-10000:].values.astype(np.float32))
+  noise = swap_noise.noise(df.values).astype(np.float32)
+  train = TupleDataset(noise, df.values.astype(np.float32))
+  test  = TupleDataset(noise[-10000:].astype(np.float32), df[-10000:].values.astype(np.float32))
 
   EPOCHS = 200
-  DECAY  = 0.99
+  DECAY  = 0.995
   BATCH_SIZE = 512
   OPTIMIZER = chainer.optimizers.SGD()
 
@@ -74,7 +76,7 @@ if '--train' in sys.argv:
 
   updater = training.updaters.StandardUpdater(train_iter, OPTIMIZER, device=1)
   trainer = training.Trainer(updater, (EPOCHS, 'epoch'), out='outputs')
-  #trainer.extend(extensions.Evaluator(test_iter, model, device=1))
+  trainer.extend(extensions.Evaluator(test_iter, model, device=1))
   trainer.extend(extensions.dump_graph('main/loss'))
   #frequency = args.epoch if args.frequency == -1 else max(1, args.frequency)
   frequency = EPOCHS
@@ -86,7 +88,12 @@ if '--train' in sys.argv:
   def lr_drop(trainer):
     trainer.updater.get_optimizer('main').lr *= DECAY
     #print('now learning rate', trainer.updater.get_optimizer('main').lr)
+  def save_model(trainer):
+    chainer.serializers.save_hdf5(f'snapshot_model_h5', model)
+     
   trainer.extend(lr_drop, trigger=(1, 'epoch'))
+  trainer.extend(save_model, trigger=(10, 'epoch'))
+
   trainer.run()
   chainer.serializers.save_hdf5(f'model_{EPOCHS:09d}.h5', model)
 
