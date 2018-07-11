@@ -44,23 +44,24 @@ if '--train' in sys.argv:
   df = df.drop(['target'], axis=1)
   EPOCHS = 2
   DECAY  = 0.995
-  BATCH_SIZE = 512
-  INIT_LR = 0.01
+  BATCH_SIZE = 128
+  INIT_LR = 0.003
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
+  chainer.serializers.load_hdf5('models/model_000000046_0.007021997_0.000870723.h5', model)
+  OPTIMIZER = chainer.optimizers.SGD(lr=INIT_LR)
+  OPTIMIZER.setup(model)
   #chainer.serializers.load_hdf5('model.h5', model)
-  for cycle in range(200):
+  for cycle in range(300):
     noise = swap_noise.noise(df.values).astype(np.float32)
     train = TupleDataset(noise, df.values.astype(np.float32))
     test  = TupleDataset(noise[-10000:].astype(np.float32), df[-10000:].values.astype(np.float32))
 
-    OPTIMIZER = chainer.optimizers.SGD(lr=INIT_LR)
     # iteration, which will be used by the PrintReport extension below.
     model.compute_accuracy = False
     chainer.backends.cuda.get_device_from_id(0).use()
     model.to_gpu()  # Copy the model to the GPU
     print(f'cytle {cycle-1:09d}')
 
-    OPTIMIZER.setup(model)
     train_iter = chainer.iterators.SerialIterator(train , BATCH_SIZE, repeat=True)
     test_iter  = chainer.iterators.SerialIterator(test,  BATCH_SIZE, repeat=False, shuffle=False)
 
@@ -77,7 +78,7 @@ if '--train' in sys.argv:
 
     def lr_drop(trainer):
       trainer.updater.get_optimizer('main').lr *= DECAY
-      #print('now learning rate', trainer.updater.get_optimizer('main').lr)
+      print('now learning rate', trainer.updater.get_optimizer('main').lr)
     def save_model(trainer):
       chainer.serializers.save_hdf5(f'snapshot_15000_model_h5', model)
        
