@@ -90,7 +90,7 @@ if '--predict' in sys.argv:
   df = df.set_index('id')
   df = df.drop(['target'], axis=1)
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
-  chainer.serializers.load_hdf5('models/model_000000199_0.007169580_0.001018013.h5', model)
+  chainer.serializers.load_hdf5('models/model_000000099_0.014400772_0.003357528.h5', model)
   chainer.backends.cuda.get_device_from_id(0).use()
   model.to_cpu()  # Copy the model to the CPU
   BATCH_SIZE = 512

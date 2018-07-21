@@ -2,8 +2,8 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt
 import lightgbm as lgb
 from sklearn.cross_validation import KFold
-
 import numpy as np
+
 def get_oof(clf, x_train, y, x_test):
     NFOLDS=5
     SEED=71
@@ -35,10 +35,7 @@ def get_oof(clf, x_train, y, x_test):
         y_te = y[test_index]
         x_te = x_train[test_index]
         lgtrain = lgb.Dataset(x_tr, y_tr)
-                    #feature_name=x_train.columns.tolist())
         lgvalid = lgb.Dataset(x_te, y_te)
-                    #feature_name=x_train.columns.tolist())
-                    #categorical_feature = categorical)
         lgb_clf = lgb.train(
             lgbm_params,
             lgtrain,
@@ -52,7 +49,6 @@ def get_oof(clf, x_train, y, x_test):
         oof_test_skf[i, :]    = lgb_clf.predict(x_test)
         del (lgvalid, lgtrain)
         gc.collect()
-
     oof_test[:] = oof_test_skf.mean(axis=0)
     return oof_train, oof_test
 
@@ -74,7 +70,6 @@ def train_all(tdf, ydf, Tdf):
       'verbose': 0
   }
   lgtrain = lgb.Dataset(tdf, ydf)
-  #lgvalid = lgb.Dataset(x_te, y_te)
   cvr = lgb_clf = lgb.cv(
       lgbm_params,
       lgtrain,
@@ -89,9 +84,7 @@ def train_all(tdf, ydf, Tdf):
   preds = lgb_clf.predict(Tdf)
   return preds
 import glob, gc
-
 import pandas as pd
-
 print('load np')
 for fn in sorted(glob.glob('dumps/*.npy')):
   print( fn, np.load(fn).shape )
@@ -99,30 +92,27 @@ adf = np.vstack( [np.load(fn) for fn in sorted(glob.glob('dumps/*.npy')) ] )
 train = pd.read_csv('../input/train.csv')
 print(train.shape)
 train_height = train.shape[0]
-
 tdf = adf[0:train_height]
 Tdf = adf[train_height:len(adf)]
-
 print('finish np')
 print('deep stack', len(tdf))
 print('y targets', len(train))
 y  = train['target']
+
 import sys
 if '--kfold' in sys.argv:
   oof_train, oof_test = get_oof(None, tdf,  y, Tdf)
   from sklearn.metrics import roc_auc_score
   from sklearn.metrics import log_loss
-  train_auc = roc_auc_score(y, oof_train)
+  train_auc     = roc_auc_score(y, oof_train)
   train_logloss = log_loss(y, oof_train)
   print('train auc', train_auc)
   print('train logloss', train_logloss)
-
   print("Modeling Stage")
   preds = np.concatenate([oof_test])
-  sub = pd.read_csv('../input/sample_submission.csv')
-
+  sub   = pd.read_csv('../input/sample_submission.csv')
   sub['target'] = preds
-  sub.to_csv('sub_et2.csv', index=False)
+  sub.to_csv('sub_dae.csv', index=False)
 
 if '--all' in sys.argv:
   train_all(tdf, y, Tdf)
