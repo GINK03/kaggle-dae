@@ -210,6 +210,10 @@ if '--predict' in sys.argv:
 ```
 
 ## LightGBMで学習
+```console
+$ python3 lgb-join-huge.py --kfold
+```
+
 
 ## 学習結果
 
