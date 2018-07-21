@@ -210,8 +210,34 @@ if '--predict' in sys.argv:
 ```
 
 ## LightGBMで学習
+```console
+$ python3 lgb-join-huge.py --kfold
+```
 
-## 学習結果
+## 結果
+michaelさんのネットワークは５つのモデルのアンサンブルで、この個数を行うのは割と容易ではないことです。  
+
+そのため、一つのディープスタックネットワークで行いましたが、`loglossが`と完全には追いついていません。  
+
+しかし、Late Sumissionの結果では一つのモデルに対してBenchMakrとPure LightGBM(前処理など最低限)とDAEでこの様になっており、簡単には精度に対して寄与しないということがわかっています。  
+
+**benchmark**
+```
+Private 0.25101
+Public 0.24352
+```
+
+**Pure LightGBM**
+```
+Private 0.28540
+Public  0.28091
+```
+
+**DAE**
+```
+Private 0.27716
+Public  0.27203
+```
 
 ## 考察
 
