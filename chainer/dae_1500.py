@@ -86,29 +86,18 @@ if '--train' in sys.argv:
   chainer.serializers.save_hdf5(f'models/model_1500.h5', model)
 
 if '--predict' in sys.argv:
-  tdf = pd.read_csv('../michael/vars/one_hot_train.csv')
-  Tdf = pd.read_csv('../michael/vars/one_hot_test.csv')
-  df = pd.concat([tdf, Tdf], axis=0)
+  df = pd.read_csv('vars/one_hot_all.csv')
   df = df.set_index('id')
   df = df.drop(['target'], axis=1)
-  #train = TupleDataset(df.values.astype(np.float32), df.values.astype(np.float32))
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
   chainer.serializers.load_hdf5('models/model_000000199_0.007169580_0.001018013.h5', model)
-
   chainer.backends.cuda.get_device_from_id(0).use()
   model.to_cpu()  # Copy the model to the CPU
-
   BATCH_SIZE = 512
-  #eval_iter = chainer.iterators.SerialIterator(train , BATCH_SIZE)
-  
   print( df.values.shape )
   height, width = df.values.shape
-  #for ev in eval_iter:
-  #  model.predictor(Variable(ev))
   is_predict = True
-  
   args = [(k, split) for k, split in enumerate(np.split(df.values.astype(np.float32), list(range(0, height, 10000)) + [height] ))]
-
   for k, split in args:
     r = model.predictor( split ).data
     if r.shape[0] == 0:
