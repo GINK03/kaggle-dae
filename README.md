@@ -90,6 +90,13 @@ df.to_csv('vars/rank_gauss_all.csv', index=None)
 
 ## DAEパラメータ
 
+<div align="center">
+  <img width="680px" src="https://i.imgur.com/z62wCWj.png&hmac=24dHVrGgJIaH4WjlpR8LlMzfhKPampPNSpQg8rLA5Fg=">
+</div>
+<div align="center"> 図4. michaelさんが調整したパラメータ </div>
+
+このように、何種類かのDenosing AutoEncoderをアンサンブルして、正則化を強めに設定したLGBで学習する.  
+
 ## chainerで作成した学習コード
 
 ## 中間層の取り出し
