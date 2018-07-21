@@ -1,4 +1,4 @@
-# DenosingAutoEncoderによるオーバーフィットを防ぎつつ精度向上
+# テーブルデータに対して、DenosingAutoEncoderによるオーバーフィットを防ぎつつ精度向上
 
 Kaggle Porto Seguroの1st placeソリューションの分析と追試
 
