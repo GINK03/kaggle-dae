@@ -184,7 +184,9 @@ if '--train' in sys.argv:
 ```
 
 ## 中間層の取り出し
-データがそれなりに多いので、CPUで適当なサイズに切り出して予想します
+データがそれなりに多いので、CPUで適当なサイズに切り出して予想します  
+
+npyファイル形式にチャンクされたファイルがダンプされます  
 ```python
 if '--predict' in sys.argv:
   df = pd.read_csv('vars/one_hot_all.csv')
