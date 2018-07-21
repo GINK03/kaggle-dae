@@ -23,6 +23,17 @@ Kaggle Porto Seguroでは問題となっている点があって、テストデ�
 
 ## MichaelさんのとったDAE(DenosingAutoEncoder)の特徴
 
+### noiseを掛ける方法
+swap　noiseという方法を用います。これは、uniformやgaussian noiseをこれらにかけても適切ではないという点を抱えているため、いくつかのハッキーな方法が取られています。  
+swap noiseはランダムに10%程度の確率で、"同じ列"で"他の行"と入れ替える技で、これによりノイズを掛けます。  
+
+これをすべての要素にたいして適応するすると、割と現実的なnoisingになるそうです。  
+<div align="center">
+  <img width="680px" src="https://d2mxuefqeaa7sj.cloudfront.net/s_41B02D2D66C0D76C571B951DD8B34CC4006073F98B54F9233C265E9EDEABCBB8_1530768386174_image.png">
+</div>
+<div align="center"> 図3. swap noise </div>
+
+
 ## DAEパラメータ
 
 ## chainerで作成した学習コード
