@@ -16,9 +16,9 @@ def noise(array):
 
   for h in range(height):
     for w in range(width):
-      if rands[h, w] <= 0.10:
+      if rands[h, w] <= 0.20:
         swap_target_h = random.randint(0,height)
-        copy[h, w] = array[swap_target_h, w]
+        copy[h, w] = array[swap_target_h-1, w]
       #print(rands[h,w])
   print('finish noising') 
   return copy

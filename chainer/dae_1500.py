@@ -37,9 +37,7 @@ import sys
 import swap_noise
 is_predict = None
 if '--train' in sys.argv:
-  tdf = pd.read_csv('../michael/vars/one_hot_train.csv')
-  Tdf = pd.read_csv('../michael/vars/one_hot_test.csv')
-  df = pd.concat([tdf, Tdf], axis=0)
+  df = pd.read_csv('vars/one_hot_all.csv')
   df = df.set_index('id')
   df = df.drop(['target'], axis=1)
   EPOCHS = 2
@@ -47,29 +45,23 @@ if '--train' in sys.argv:
   BATCH_SIZE = 128
   INIT_LR = 0.003
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
-  chainer.serializers.load_hdf5('models/model_000000046_0.007021997_0.000870723.h5', model)
   OPTIMIZER = chainer.optimizers.SGD(lr=INIT_LR)
   OPTIMIZER.setup(model)
-  #chainer.serializers.load_hdf5('model.h5', model)
   for cycle in range(300):
     noise = swap_noise.noise(df.values).astype(np.float32)
     train = TupleDataset(noise, df.values.astype(np.float32))
     test  = TupleDataset(noise[-10000:].astype(np.float32), df[-10000:].values.astype(np.float32))
-
     # iteration, which will be used by the PrintReport extension below.
     model.compute_accuracy = False
-    chainer.backends.cuda.get_device_from_id(0).use()
+    chainer.backends.cuda.get_device_from_id(1).use()
     model.to_gpu()  # Copy the model to the GPU
-    print(f'cytle {cycle-1:09d}')
-
+    print(f'cycle {cycle-1:09d}')
     train_iter = chainer.iterators.SerialIterator(train , BATCH_SIZE, repeat=True)
     test_iter  = chainer.iterators.SerialIterator(test,  BATCH_SIZE, repeat=False, shuffle=False)
-
-    updater = training.updaters.StandardUpdater(train_iter, OPTIMIZER, device=0)
+    updater = training.updaters.StandardUpdater(train_iter, OPTIMIZER, device=1)
     trainer = training.Trainer(updater, (EPOCHS, 'epoch'), out='outputs')
-    trainer.extend(extensions.Evaluator(test_iter, model, device=0))
+    trainer.extend(extensions.Evaluator(test_iter, model, device=1))
     trainer.extend(extensions.dump_graph('main/loss'))
-    #frequency = args.epoch if args.frequency == -1 else max(1, args.frequency)
     frequency = EPOCHS
     trainer.extend(extensions.snapshot(), trigger=(frequency, 'epoch'))
     trainer.extend(extensions.LogReport())
@@ -84,9 +76,8 @@ if '--train' in sys.argv:
        
     trainer.extend(lr_drop, trigger=(1, 'epoch'))
     trainer.extend(save_model, trigger=(10, 'epoch'))
-    
     trainer.run()
-    model.to_cpu()  # Copy the model to the GPU
+    model.to_cpu()  # Copy the model to the CPU
     mse1 = mean_squared_error( df[-10000:].values.astype(np.float32),  model.predictor(  noise[-10000:].astype(np.float32) ).data )
     mse2 = mean_squared_error( df[-10000:].values.astype(np.float32),  model.predictor( df[-10000:].values.astype(np.float32) ).data )
     print('mse1', mse1)

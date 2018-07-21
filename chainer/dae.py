@@ -40,7 +40,8 @@ import chainer.serializers
 import sys
 import swap_noise
 from sklearn.metrics import mean_squared_error
-
+noising = swap_noise.noise
+print(noising)
 is_predict = None
 if '--train' in sys.argv:
   tdf = pd.read_csv('../michael/vars/one_hot_train.csv')
@@ -51,10 +52,10 @@ if '--train' in sys.argv:
 
   EPOCHS = 1
   DECAY  = 0.995
-  BATCH_SIZE = 512*2
-  INIT_LR = 0.001
+  BATCH_SIZE = 128
+  INIT_LR = 0.003
 
-  OPTIMIZER = chainer.optimizers.Adam(alpha=INIT_LR)
+  OPTIMIZER = chainer.optimizers.SGD(lr=INIT_LR)
 
   # iteration, which will be used by the PrintReport extension below.
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
@@ -65,7 +66,7 @@ if '--train' in sys.argv:
   OPTIMIZER.setup(model)
   
   for i in range(200):
-    noise = swap_noise.noise(df.values).astype(np.float32)
+    noise = noising(df.values).astype(np.float32)
     train = TupleDataset(noise, df.values.astype(np.float32))
     test  = TupleDataset(noise[-10000:].astype(np.float32), df[-10000:].values.astype(np.float32))
     train_iter = chainer.iterators.SerialIterator(train , BATCH_SIZE, repeat=True)
@@ -83,8 +84,8 @@ if '--train' in sys.argv:
     trainer.extend(extensions.ProgressBar())
 
     def lr_drop(trainer):
-      trainer.updater.get_optimizer('main').alpha *= DECAY
-      print('now learning rate', trainer.updater.get_optimizer('main').alpha)
+      trainer.updater.get_optimizer('main').lr *= DECAY
+      print('now learning rate', trainer.updater.get_optimizer('main').lr)
     def save_model(trainer):
       chainer.serializers.save_hdf5(f'snapshot_model_h5', model)
        
@@ -98,7 +99,7 @@ if '--train' in sys.argv:
     mse2 = mean_squared_error( df[-10000:].values.astype(np.float32),  model.predictor( df[-10000:].values.astype(np.float32) ).data )
     print('mse1', mse1)
     print('mse2', mse2)
-    chainer.serializers.save_hdf5(f'models/model_{i:09d}_{mse1}_{mse2}.h5', model)
+    chainer.serializers.save_hdf5(f'models/model_sgd_{i:09d}_{mse1}_{mse2}.h5', model)
 
 if '--predict' in sys.argv:
   tdf = pd.read_csv('../michael/vars/one_hot_train.csv')
@@ -108,7 +109,7 @@ if '--predict' in sys.argv:
   df = df.drop(['target'], axis=1)
   #train = TupleDataset(df.values.astype(np.float32), df.values.astype(np.float32))
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
-  chainer.serializers.load_hdf5('model.h5', model)
+  chainer.serializers.load_hdf5('models/model_000000198_0.004111984744668007_0.00024372930056415498.h5', model)
 
   chainer.backends.cuda.get_device_from_id(0).use()
   model.to_cpu()  # Copy the model to the GPU
@@ -121,5 +122,12 @@ if '--predict' in sys.argv:
   #for ev in eval_iter:
   #  model.predictor(Variable(ev))
   is_predict = True
-  r = model.predictor( df.values[:10].astype(np.float32) )
-  print(r.data.shape)
+  
+  args = [(k, split) for k, split in enumerate(np.split(df.values.astype(np.float32), list(range(0, height, 10000)) + [height] ))]
+
+  for k, split in args:
+    r = model.predictor( split ).data
+    if r.shape[0] == 0:
+      continue
+    np.save(f'dumps/{k:04d}', r) 
+    print(r.shape)
