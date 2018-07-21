@@ -13,6 +13,14 @@ Kaggle Porto Seguroでは問題となっている点があって、テストデ�
 </div>
 <div align="center"> 図1. よくある画像の例 </div>
 
+画像の利用からテーブルデータの利用に変換する操作を行います。  
+
+この用途はあまり見たことがなかったので、有益でした。（画像にイメージがかかっていますが実際は値に対してかかります）
+<div align="center">
+  <img width="600px" src="https://d2mxuefqeaa7sj.cloudfront.net/s_395C846F6BB54334ACB188FAC2F01C0FF7D15E56852EC0E8EFD1BA2A22439502_1532150414056_image.png">
+</div>
+<div align="center"> 図2. テーブルデータのノイズを除去 </div>
+
 ## MichaelさんのとったDAE(DenosingAutoEncoder)の特徴
 
 ## DAEパラメータ
