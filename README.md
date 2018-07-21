@@ -60,9 +60,16 @@ def noise(array):
 Rank　Gaussという連続値を特定の範囲の閉域に押し込めて、分布の偏りを解消する方法です。  
 これも彼の言葉を頼りに実装していましたが、このようなコードになるかとおもいます。  
 ```python
-df = pd.read_csv(fname)
+import pandas as pd
+tdf = pd.read_csv('../input/train.csv')
+Tdf = pd.read_csv('../input/test.csv')
+df = pd.concat([tdf, Tdf], axis=0)
 print(df.head())
+# catが最後につくとカテゴリ
+# binがつくとワンホット
+# 何もつかないと、連続値
 from scipy.special import erfinv
+import re
 ## to_rank
 for c in df.columns:
   if c in ['id', 'target'] or re.search(r'cat$', c) or 'bin' in c:
@@ -74,10 +81,8 @@ for c in df.columns:
   series = (series-m)/(M-m)
   series = series - series.mean()
   series = series.apply(erfinv) 
-  #for s in series:
-  #  print(s)
   df[c] = series
-df.to_csv(oname, index=None)
+df.to_csv('vars/rank_gauss_all.csv', index=None)
 ```
 流れとしては、まずランクを計算し、[0, 1]に押し込めて、平均を計算し、(-0.5,0.5)に変換します。  
 
