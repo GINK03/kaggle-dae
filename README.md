@@ -34,6 +34,33 @@ swap noiseはランダムに10%程度の確率で、"同じ列"で"他の行"と
 <div align="center"> 図3. swap noise </div>
 
 
+### rank gauss
+Rank　Gaussという連続値を特定の範囲の閉域に押し込めて、分布の偏りを解消する方法です。  
+これも彼の言葉を頼りに実装していましたが、このようなコードになるかとおもいます。  
+```python
+df = pd.read_csv(fname)
+print(df.head())
+from scipy.special import erfinv
+## to_rank
+for c in df.columns:
+  if c in ['id', 'target'] or re.search(r'cat$', c) or 'bin' in c:
+    continue
+  series = df[c].rank()
+  M = series.max()
+  m = series.min() 
+  print(c, m, len(series), len(set(df[c].tolist())))
+  series = (series-m)/(M-m)
+  series = series - series.mean()
+  series = series.apply(erfinv) 
+  #for s in series:
+  #  print(s)
+  df[c] = series
+df.to_csv(oname, index=None)
+```
+流れとしては、まずランクを計算し、[0, 1]に押し込めて、平均を計算し、(-0.5,0.5)に変換します。  
+
+これに対してerfiv関数をかけると、ランクの方よりが正規分布のような形変換することができます。  
+
 ## DAEパラメータ
 
 ## chainerで作成した学習コード
