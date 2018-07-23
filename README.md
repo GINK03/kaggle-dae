@@ -239,7 +239,19 @@ Private 0.27716
 Public  0.27203
 ```
 
-**DAE + Dense\*3**
+**DAE + Dense\*2 + Adam**
+```
+Private 0.26320
+Public  0.25920
+```
+
+**DAE + Dense\*2 + SGD**
+```
+Private 0.23926
+Public  0.23258
+```
+
+**DAE + Dense\*3 + Adam**
 ```
 ```
 
