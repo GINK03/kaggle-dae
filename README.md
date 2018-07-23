@@ -233,10 +233,14 @@ Private 0.28540
 Public  0.28091
 ```
 
-**DAE**
+**DAE + LightGBM**
 ```
 Private 0.27716
 Public  0.27203
+```
+
+**DAE + Dense\*3**
+```
 ```
 
 ## 注意
