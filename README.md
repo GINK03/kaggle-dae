@@ -221,10 +221,9 @@ michaelさんのネットワークは５つのモデルのアンサンブルで�
 
 しかし、Late Sumissionの結果では一つのモデルに対してBenchMakrとPure LightGBM(前処理など最低限)とDAEでこの様になっており、簡単には精度に対して寄与しないということがわかっています。  
 
-**benchmark**
+**Random Forest benchmark**
 ```
-Private 0.25101
-Public 0.24352
+Public 0.23824
 ```
 
 **Pure LightGBM**
