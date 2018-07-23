@@ -47,6 +47,7 @@ if '--train' in sys.argv:
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
   OPTIMIZER = chainer.optimizers.SGD(lr=INIT_LR)
   OPTIMIZER.setup(model)
+  
   for cycle in range(300):
     noise = swap_noise.noise(df.values).astype(np.float32)
     train = TupleDataset(noise, df.values.astype(np.float32))
@@ -90,7 +91,7 @@ if '--predict' in sys.argv:
   df = df.set_index('id')
   df = df.drop(['target'], axis=1)
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
-  chainer.serializers.load_hdf5('models/model_000000099_0.014400772_0.003357528.h5', model)
+  chainer.serializers.load_hdf5('models/model_000000194_0.013944688_0.002879780.h5', model)
   chainer.backends.cuda.get_device_from_id(0).use()
   model.to_cpu()  # Copy the model to the CPU
   BATCH_SIZE = 512

@@ -112,7 +112,7 @@ if '--kfold' in sys.argv:
   preds = np.concatenate([oof_test])
   sub   = pd.read_csv('../input/sample_submission.csv')
   sub['target'] = preds
-  sub.to_csv('sub_dae.csv', index=False)
+  sub.to_csv('sub_hgb.csv', index=False)
 
 if '--all' in sys.argv:
   train_all(tdf, y, Tdf)
