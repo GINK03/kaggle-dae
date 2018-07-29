@@ -15,7 +15,7 @@ Kaggle Porto Seguroでは問題となっている点があって、テストデ�
 
 画像の利用からテーブルデータの利用に変換する操作を行います。  
 
-この用途はあまり見たことがなかったので、有益でした。（画像にイメージがかかっていますが実際は値に対してかかります）
+この用途はあまり見たことがなかったので、有益でした。（画像にノイズがかかっていますが実際は値に対してかかります）
 <div align="center">
   <img width="680px" src="https://d2mxuefqeaa7sj.cloudfront.net/s_395C846F6BB54334ACB188FAC2F01C0FF7D15E56852EC0E8EFD1BA2A22439502_1532150414056_image.png">
 </div>
@@ -24,7 +24,8 @@ Kaggle Porto Seguroでは問題となっている点があって、テストデ�
 ## MichaelさんのとったDAE(DenosingAutoEncoder)の特徴
 
 ### noiseを掛ける方法
-swap　noiseという方法を用います。これは、uniformやgaussian noiseをこれらにかけても適切ではないという点を抱えているため、いくつかのハッキーな方法が取られています。  
+swap　noiseという方法を用います。これは、uniformやgaussian noiseをこれらに和算や積算などで、かけても適切ではないという点を抱えているため、いくつかのハッキーな方法が取られています。  
+
 swap noiseはランダムに10%程度の確率で、"同じ列"で"他の行"と入れ替える技で、これによりノイズを掛けます。  
 
 これをすべての要素にたいして適応するすると、割と現実的なnoisingになるそうです。  
