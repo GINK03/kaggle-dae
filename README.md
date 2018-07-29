@@ -210,11 +210,6 @@ if '--predict' in sys.argv:
     print(r.shape)
 ```
 
-## LightGBMで学習
-```console
-$ python3 lgb-join-huge.py --kfold
-```
-
 ## 結果
 michaelさんのネットワークは５つのモデルのアンサンブルで、この個数を行うのは割と容易ではないことです。  
 
