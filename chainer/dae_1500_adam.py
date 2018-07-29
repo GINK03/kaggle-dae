@@ -41,9 +41,9 @@ if '--train' in sys.argv:
   df = df.set_index('id')
   df = df.drop(['target'], axis=1)
   EPOCHS = 2
-  DECAY  = 0.995
+  DECAY  = 0.95
   BATCH_SIZE = 128
-  INIT_LR = 0.003
+  INIT_LR = 0.001
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
   OPTIMIZER = chainer.optimizers.SGD(lr=INIT_LR)
   OPTIMIZER.setup(model)

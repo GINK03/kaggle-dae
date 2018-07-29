@@ -26,7 +26,8 @@ class MLP(chainer.Chain):
     h2 = F.relu(self.l2(h1))
     h3 = F.relu(self.l3(h2))
     if is_predict:
-      return np.hstack([h1.data, h2.data, h3.data])
+      #return np.hstack([h1.data, h2.data, h3.data])
+      return np.hstack([h2.data])
     h4 = self.l4(h3) 
     return h4
 
@@ -91,7 +92,7 @@ if '--predict' in sys.argv:
   df = df.set_index('id')
   df = df.drop(['target'], axis=1)
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
-  chainer.serializers.load_hdf5('model-sgd/model_000000194_0.013944688_0.002879780.h5', model)
+  chainer.serializers.load_hdf5('model-sgd/model_000000093_0.009053003_0.000698222.h5', model)
   chainer.backends.cuda.get_device_from_id(0).use()
   model.to_cpu()  # Copy the model to the CPU
   BATCH_SIZE = 512
@@ -100,7 +101,8 @@ if '--predict' in sys.argv:
   is_predict = True
   args = [(k, split) for k, split in enumerate(np.split(df.values.astype(np.float32), list(range(0, height, 10000)) + [height] ))]
   for k, split in args:
-    r = model.predictor( split ).data
+    r = np.array(model.predictor( split ).data)
+    print(r)
     if r.shape[0] == 0:
       continue
     np.save(f'dumps/{k:04d}', r) 
