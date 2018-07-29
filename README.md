@@ -233,9 +233,10 @@ Public  0.28091
 ```
 
 **DAE + LightGBM**
+※ Leaves, Depth, 正則化などのパラメータを再調整する必要があります  
 ```
-Private 0.27716
-Public  0.27203
+Private 0.28910
+Public  0.28112
 ```
 
 **DAE + Dense\*2 + Adam**
@@ -245,14 +246,12 @@ Public  0.25920
 ```
 
 **DAE + Dense\*2 + SGD**
+* Parameter
 ```
 Private 0.23926
 Public  0.23258
 ```
 
-**DAE + Dense\*3 + Adam**
-```
-```
 
 ## 注意
  中間層を吐き出して、それをもとに再学習する操作が、想像以上にメモリを消耗するので、96GBのマシンと49GBのマシンの２つ必要でした。  
