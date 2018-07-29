@@ -217,35 +217,17 @@ michaelさんのネットワークは５つのモデルのアンサンブルで�
 
 しかし、Late Sumissionの結果では一つのモデルに対してBenchMakrとPure LightGBM(前処理など最低限)とDAEでこの様になっており、簡単には精度に対して寄与しないということがわかっています。  
 
-**Random Forest benchmark**
+**LightGBMだけ**
 ```
-Public 0.23824
-```
-
-**Pure LightGBM**
-```
-Private 0.28540
-Public  0.28091
+train auc 0.6250229489476413
+train logloss 0.1528616157817217
 ```
 
 **DAE + LightGBM**
 ※ Leaves, Depth, 正則化などのパラメータを再調整する必要があります  
 ```
-Private 0.28910
-Public  0.28112
-```
-
-**DAE + Dense\*2 + Adam**
-```
-Private 0.26320
-Public  0.25920
-```
-
-**DAE + Dense\*2 + SGD**
-* Parameter
-```
-Private 0.23926
-Public  0.23258
+train auc 0.6403338821473902
+train logloss 0.15185993565491557
 ```
 
 
