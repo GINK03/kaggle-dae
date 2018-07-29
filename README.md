@@ -129,37 +129,32 @@ class MLP(chainer.Chain):
 ```
 学習部分
 ```python
-from chainer.datasets import TupleDataset
-import pandas as pd
-import chainer.serializers
-import sys
-import swap_noise
-is_predict = None
 if '--train' in sys.argv:
-  df = pd.read_csv('vars/')
+  df = pd.read_csv('vars/one_hot_all.csv')
   df = df.set_index('id')
   df = df.drop(['target'], axis=1)
   EPOCHS = 2
   DECAY  = 0.995
   BATCH_SIZE = 128
-  INIT_LR = 0.003
+  INIT_LR = 3 #0.003
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
   OPTIMIZER = chainer.optimizers.SGD(lr=INIT_LR)
   OPTIMIZER.setup(model)
+  
   for cycle in range(300):
     noise = swap_noise.noise(df.values).astype(np.float32)
     train = TupleDataset(noise, df.values.astype(np.float32))
     test  = TupleDataset(noise[-10000:].astype(np.float32), df[-10000:].values.astype(np.float32))
     # iteration, which will be used by the PrintReport extension below.
     model.compute_accuracy = False
-    chainer.backends.cuda.get_device_from_id(0).use()
+    chainer.backends.cuda.get_device_from_id(1).use()
     model.to_gpu()  # Copy the model to the GPU
     print(f'cycle {cycle-1:09d}')
     train_iter = chainer.iterators.SerialIterator(train , BATCH_SIZE, repeat=True)
     test_iter  = chainer.iterators.SerialIterator(test,  BATCH_SIZE, repeat=False, shuffle=False)
-    updater = training.updaters.StandardUpdater(train_iter, OPTIMIZER, device=0)
+    updater = training.updaters.StandardUpdater(train_iter, OPTIMIZER, device=1)
     trainer = training.Trainer(updater, (EPOCHS, 'epoch'), out='outputs')
-    trainer.extend(extensions.Evaluator(test_iter, model, device=0))
+    trainer.extend(extensions.Evaluator(test_iter, model, device=1))
     trainer.extend(extensions.dump_graph('main/loss'))
     frequency = EPOCHS
     trainer.extend(extensions.snapshot(), trigger=(frequency, 'epoch'))
@@ -181,8 +176,7 @@ if '--train' in sys.argv:
     mse2 = mean_squared_error( df[-10000:].values.astype(np.float32),  model.predictor( df[-10000:].values.astype(np.float32) ).data )
     print('mse1', mse1)
     print('mse2', mse2)
-    chainer.serializers.save_hdf5(f'models/model_{cycle:09d}_{mse1:0.09f}_{mse2:0.09f}.h5', model)
-  chainer.serializers.save_hdf5(f'models/model_1500.h5', model)
+    chainer.serializers.save_hdf5(f'model-sgd/model_{cycle:09d}_{mse1:0.09f}_{mse2:0.09f}.h5', model)
 ```
 
 ## 中間層の取り出し
@@ -222,7 +216,8 @@ LightGBMにDAEのネットワークの活性化した値を入れると、精度
 5-cv train logloss 0.1528616157817217
 ```
 
-**DAE + LightGBM**
+**DAE + LightGBM**  
+
 ※ Leaves, Depth, 正則化などのパラメータを再調整する必要があります  
 ```
 5-cv train auc 0.6403338821473902
@@ -235,8 +230,6 @@ LightGBMにDAEのネットワークの活性化した値を入れると、精度
  軽い操作ではないです。
  
  Deepあるあるだとは思うのですが、入れるデータによっても、解くべき問題によっても微妙にパラメータを調整する箇所が多く、膨大な試行錯誤が伴います。
- 
- また、何分、手触り感がよくわからない操作も多く、フレームワークのせいでうまくいかないのかバグなのか切り出しが不透明であったため、kerasとchainerの双方で実装することになり、他人のエッジ領域の技術を再現するのはまぁ難しいねという気持ちです。（勉強になりました）
 
 ## プログラム
 
