@@ -83,7 +83,7 @@ if '--train' in sys.argv:
     mse2 = mean_squared_error( df[-10000:].values.astype(np.float32),  model.predictor( df[-10000:].values.astype(np.float32) ).data )
     print('mse1', mse1)
     print('mse2', mse2)
-    chainer.serializers.save_hdf5(f'models-adam/model_{cycle:09d}_{mse1:0.09f}_{mse2:0.09f}.h5', model)
+    chainer.serializers.save_hdf5(f'model-adam/model_{cycle:09d}_{mse1:0.09f}_{mse2:0.09f}.h5', model)
   #chainer.serializers.save_hdf5(f'models/model_1500.h5', model)
 
 if '--predict' in sys.argv:
@@ -91,7 +91,7 @@ if '--predict' in sys.argv:
   df = df.set_index('id')
   df = df.drop(['target'], axis=1)
   model = L.Classifier(MLP(), lossfun=F.mean_squared_error)
-  chainer.serializers.load_hdf5('models-adam/model_000000194_0.013944688_0.002879780.h5', model)
+  chainer.serializers.load_hdf5('model-adam/model_000000194_0.013944688_0.002879780.h5', model)
   chainer.backends.cuda.get_device_from_id(0).use()
   model.to_cpu()  # Copy the model to the CPU
   BATCH_SIZE = 512
