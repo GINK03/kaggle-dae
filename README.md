@@ -263,6 +263,9 @@ Public  0.23258
 
 ## プログラム
 
+**プロジェクト**  
+[https://github.com/GINK03/kaggle-dae]
+
 **rank-gauss.py**  
 連続値や1hot表現をランクガウスに変換  
 
