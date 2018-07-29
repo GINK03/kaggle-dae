@@ -54,9 +54,7 @@ def build_model(input_size=4500):
   x = Dense(1000, activation='relu')(ix)
   x = Dropout(0.5)(x)
   x = Dense(1000, activation='relu')(x)
-  x = Dropout(0.5)(x)
-  x = Dense(1000, activation='relu')(x)
-  x = Dropout(0.5)(x)
+  #x = Dropout(0.5)(x)
   x = Dense(1, activation='sigmoid')(x)
   
   model = Model(ix, x)
